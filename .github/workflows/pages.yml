@@ -1,8 +1,9 @@
-name: Build & Deploy docs to GitHub Pages
+name: Build & Deploy docs
 
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,27 +18,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Generate docs (from data/)
+      - name: Generate docs (index.html)
         run: |
           python scripts/gen_docs.py
-          # 若脚本异常，至少保证 docs/ 存在，避免后续步骤报错
-          if [ ! -d docs ]; then
-            mkdir -p docs
-            echo '<!doctype html><meta charset="utf-8"><title>No docs</title><p>No docs generated.</p>' > docs/index.html
-          fi
-          ls -la docs || true
 
-      - name: Upload Pages artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./docs
+          # ✅ 上传“仓库根目录”，其中应包含 gen_docs.py 写出的 index.html
+          path: .
 
   deploy:
     needs: build
@@ -46,5 +43,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
