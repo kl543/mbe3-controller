@@ -1,0 +1,23 @@
+{
+  "dt1": 5,
+  "dI1": 0.01,
+  "Imax": 2.0,
+  "I": 0.0,
+  "T1": 550,
+  "degas_time1_hr": 8,
+  "dt2": 20,
+  "dI2": 0.005,
+  "T2": 800,
+  "degas_time2_min": 30,
+  "T_mid": 1150,
+  "dt3a": 20,
+  "dI3a": 0.005,
+  "dt3b": 30,
+  "dI3b": 0.005,
+  "T3": 1300,
+  "anneal_time_min": 30,
+  "cooling_time1_min": 30,
+  "cooling_drop": 0.25,
+  "cooling_time2_min": 20,
+  "cooling_target": 0.45
+}
