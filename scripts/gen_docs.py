@@ -110,21 +110,12 @@ def list_notebooks() -> list[tuple[str, str, str]]:
             seen.add(rel)
     return uniq
 
-# ------------------------ 选图（可作为封面图墙） ------------------------
-def list_selected_images(max_count: int = 24) -> list[str]:
-    if not DATA_DIR.exists():
-        return []
-    pngs = list(DATA_DIR.rglob("*.png"))
-    # 按修改时间新→旧，最多取 max_count
-    pngs.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-    return [p.relative_to(ROOT).as_posix() for p in pngs[:max_count]]
-
 # ------------------------ Runs（保留你原来块） ------------------------
 def runs_sections() -> str:
     if not DATA_DIR.exists():
         return '<div class="muted">No data/ directory.</div>'
     cards = []
-    # 只遍历 data/ 的一级子目录；每个目录下展示该目录里的 PNG
+    # 只遍历 data/ 的一级子目录；每个目录下展示该目录里的 PNG 与 CSV/TXT
     dirs = [d for d in DATA_DIR.iterdir() if d.is_dir()]
     dirs.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     for d in dirs:
@@ -160,12 +151,11 @@ def build_html() -> str:
     header = load_site_header()
     now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
-    nbs   = list_notebooks()
-    imgs  = list_selected_images()
+    nbs = list_notebooks()
 
     html = [header, '<main class="container">']
 
-    # Notebooks（STM 风格：View (nbviewer) + Download）
+    # Notebooks（View (nbviewer) + Download）
     html.append('<section class="card">')
     html.append('<h2>Notebooks</h2>')
     if nbs:
@@ -180,21 +170,9 @@ def build_html() -> str:
         html.append('<div class="muted">No notebooks yet.</div>')
     html.append('</section>')
 
-    # Selected Figures（从 data/ 里挑最新的 PNG）
-    html.append('<section class="card">')
-    html.append('<h2>Selected Figures</h2>')
-    if imgs:
-        html.append('<div class="grid">')
-        for rel in imgs:
-            html.append('<div class="thumb">')
-            html.append(f'<img src="{rel}" alt="figure" loading="lazy" />')
-            html.append('</div>')
-        html.append('</div>')
-    else:
-        html.append('<div class="muted">No figures yet.</div>')
-    html.append('</section>')
+    # ✅ 移除 “Selected Figures” 整个分区（避免与 Recent Runs 重复）
 
-    # Runs（保留原“每个子目录一张卡片”的结构）
+    # Recent Runs（原结构不变）
     html.append('<section class="card">')
     html.append('<h2>Recent Runs</h2>')
     html.append(runs_sections())
